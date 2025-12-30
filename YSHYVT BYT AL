@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הישיבה בית אל - לוח הצדיקים</title>
+    <style>
+        :root { --primary: #1a252f; --gold: #d4af37; --bg: #f4f1ea; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: var(--bg); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background: var(--primary); color: var(--gold); text-align: center; padding: 15px; font-size: 22px; font-weight: bold; border-bottom: 4px solid var(--gold); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .main-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; }
+        .card { background: white; width: 100%; max-width: 380px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); padding: 25px; text-align: center; border: 1px solid var(--gold); transition: transform 0.3s; }
+        .date-badge { background: var(--gold); color: white; display: inline-block; padding: 5px 15px; border-radius: 50px; font-weight: bold; margin-bottom: 15px; }
+        .name-display { font-size: 26px; color: var(--primary); font-weight: bold; min-height: 100px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
+        .nav-section { display: flex; justify-content: space-between; margin-top: 25px; gap: 10px; }
+        button { flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #95a5a6; opacity: 0.6; }
+        .counter { margin-top: 15px; font-size: 14px; color: #7f8c8d; }
+        .donation-style { background: #fffde7; border: 2px dashed #fbc02d; }
+        footer { background: var(--primary); color: white; text-align: center; padding: 12px; font-size: 15px; border-top: 2px solid var(--gold); }
+    </style>
+</head>
+<body>
+
+<header>הישיבה בית אל</header>
+
+<div class="main-container">
+    <div id="card" class="card">
+        <div id="date" class="date-badge"></div>
+        <div id="name" class="name-display"></div>
+        
+        <div class="nav-section">
+            <button id="prev" onclick="change(-1)">הקודם</button>
+            <button id="next" onclick="change(1)">הבא</button>
+        </div>
+        <div id="count" class="counter"></div>
+    </div>
+</div>
+
+<footer>תאריכי פטירת הצדיקים במעגל השנה</footer>
+
+<script>
+    const data = [
+        // תשרי
+        {d:"א' תשרי", n:"שרה אימנו"}, {d:"א' תשרי", n:"רבי מיימון אבי הרמ\"בם"}, {d:"ב' תשרי", n:"הרב סלמאן אליהו"}, {d:"ה' תשרי", n:"נפתלי בן יעקב אבינו"}, {d:"ז' תשרי", n:"זבולון בן יעקב אבינו"}, {d:"ט' תשרי", n:"הגרי\"ז סולובייצ'יק"}, {d:"י' תשרי", n:"הרב יהודה לייב הלוי אשלג"}, {d:"י' תשרי", n:"רבי עקיבא"}, {d:"י\"ב תשרי", n:"רבי אברהם המלאך"}, {d:"י\"ג תשרי", n:"ר' עקיבא איגר"}, {d:"י\"ד תשרי", n:"המגיד מקוז'ניץ"}, {d:"ט\"ו תשרי", n:"יעקב אבינו"}, {d:"ט\"ו תשרי", n:"הרב אברהם שפירא"}, {d:"י\"ח תשרי", n:"רבי נחמן מברסלב"}, {d:"י\"ט תשרי", n:"הגאון מוילנא"}, {d:"י\"ט תשרי", n:"'היהודי הקדוש'"}, {d:"כ' תשרי", n:"רבי אליעזר פאפו ('פלא יועץ')"}, {d:"כ\"ד תשרי", n:"רבי יעקב יוסף מפולנאה"}, {d:"כ\"ה תשרי", n:"ר' לוי יצחק מברדיצ'ב"}, {d:"כ\"ה תשרי", n:"החת\"ם סופר"}, {d:"כ\"ז תשרי", n:"הרב יורם אברג'ל"}, {d:"כ\"ט תשרי", n:"רבי יצחק אברבנאל"}, {d:"כ\"ט תשרי", n:"שמעון הצדיק"},
+        // חשוון
+        {d:"ג' חשוון", n:"הרב עובדיה יוסף"}, {d:"ג' חשוון", n:"ר' ישראל מרוז'ין"}, {d:"ד' חשוון", n:"האדמו\"ר מפיאסצנה"}, {d:"ז' חשוון", n:"רבי מאיר שפירא מלובלין"}, {d:"ט' חשוון", n:"הרא\"ש"}, {d:"י' חשוון", n:"גד בן יעקב אבינו"}, {d:"י\"א חשוון", n:"בנימין בן יעקב אבינו"}, {d:"י\"א חשוון", n:"רחל אמנו"}, {d:"ט\"ו חשוון", n:"החזון אי\"ש"}, {d:"ט\"ז חשוון", n:"הרב שלמה קרליבך"}, {d:"י\"ז חשוון", n:"הרב שך"}, {d:"כ' חשוון", n:"הרב לורד יונתן זקס"}, {d:"כ\"ד חשוון", n:"הרב שלמה גורן"},
+        // כסלו
+        {d:"ה' כסלו", n:"המהרש\"א"}, {d:"ט' כסלו", n:"רבי דוב בער חב\"ד"}, {d:"י\"ב כסלו", n:"בעל ה'בת עין'"}, {d:"י\"ד כסלו", n:"ראובן בן יעקב"}, {d:"ט\"ו כסלו", n:"רבי יהודה הנשיא"}, {d:"י\"ח כסלו", n:"רבי ברוך ממז'יבוז'"}, {d:"י\"ט כסלו", n:"המגיד ממעזריטש"}, {d:"כ\"ד כסלו", n:"הרב שטיינמן"},
+        // טבת
+        {d:"א' טבת", n:"הרב פנחס קהתי"}, {d:"ב' טבת", n:"הרב חיים מאיר דרוקמן"}, {d:"ג' טבת", n:"ר' חיים שמואלביץ"}, {d:"ט' טבת", n:"עזרא הסופר"}, {d:"י' טבת", n:"ר' נתן מברסלב"}, {d:"י\"ז טבת", n:"המגיד מדובנה"}, {d:"י\"ט טבת", n:"קצות החושן"}, {d:"כ' טבת", n:"רמב\"ם"}, {d:"כ\"ד טבת", n:"בעל התניא"}, {d:"כ\"ט טבת", n:"הרב יצחק כדורי"},
+        // שבט
+        {d:"א' שבט", n:"המהר\"ם שיק"}, {d:"ד' שבט", n:"בבא סאלי"}, {d:"ה' שבט", n:"שפת אמת"}, {d:"י' שבט", n:"הרש\"ש"}, {d:"י' שבט", n:"הריי\"ץ מחב\"ד"}, {d:"כ\"ב שבט", n:"רבי מנחם מנדל מקוצק"}, {d:"כ\"ה שבט", n:"ר' ישראל סלנטר"},
+        // אדר
+        {d:"ז' אדר", n:"משה רבנו"}, {d:"כ' אדר", n:"ר' שלמה זלמן אויערבך"},
+        // דף תרומות
+        {d:"תרומה", n:"לתרומות לאתר:\nבנק הדואר (09)\nסניף 001\nחשבון: 763386666"}
+    ];
+
+    let current = 0;
+    function render() {
+        const item = data[current];
+        const card = document.getElementById('card');
+        const nameDiv = document.getElementById('name');
+        
+        if(item.d === "תרומה") {
+            card.classList.add('donation-style');
+            document.getElementById('date').innerText = "זכות התרומה";
+            nameDiv.innerText = item.n;
+            nameDiv.style.whiteSpace = "pre-line";
+            nameDiv.style.fontSize = "20px";
+        } else {
+            card.classList.remove('donation-style');
+            document.getElementById('date').innerText = item.d;
+            nameDiv.innerText = item.n;
+            nameDiv.style.whiteSpace = "normal";
+            nameDiv.style.fontSize = "26px";
+        }
+        
+        document.getElementById('count').innerText = "דף " + (current + 1) + " מתוך " + data.length;
+        document.getElementById('prev').disabled = current === 0;
+        document.getElementById('next').disabled = current === data.length - 1;
+    }
+
+    function change(step) {
+        current += step;
+        render();
+    }
+    render();
+</script>
+
+</body>
+</html>
+
